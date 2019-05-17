@@ -4,7 +4,7 @@ const _ = require(`lodash`)
 const { GraphQLList, getNullableType, getNamedType } = require(`graphql`)
 const { getValueAt } = require(`./utils/get-value-at`)
 
-const findMany = typeName => ({ args, context, info }) =>
+const findMany = typeName => (parent, args, context, info) =>
   context.nodeModel.runQuery(
     {
       query: args,
@@ -14,7 +14,7 @@ const findMany = typeName => ({ args, context, info }) =>
     { path: context.path, connectionType: typeName }
   )
 
-const findOne = typeName => ({ args, context, info }) =>
+const findOne = typeName => (parent, args, context, info) =>
   context.nodeModel.runQuery(
     {
       query: { filter: args },
@@ -24,9 +24,9 @@ const findOne = typeName => ({ args, context, info }) =>
     { path: context.path }
   )
 
-const findManyPaginated = typeName => async rp => {
-  const result = await findMany(typeName)(rp)
-  return paginate(result, { skip: rp.args.skip, limit: rp.args.limit })
+const findManyPaginated = typeName => async (parent, args, context, info) => {
+  const result = await findMany(typeName)(parent, args, context, info)
+  return paginate(result, { skip: args.skip, limit: args.limit })
 }
 
 const distinct = (source, args, context, info) => {
